@@ -95,7 +95,7 @@ export function Header() {
           </nav>
 
           <div className="hidden lg:flex items-center gap-4">
-            <Button asChild className="hover:scale-105 transition-transform duration-300">
+            <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white">
               <Link href="#contact">Get Started</Link>
             </Button>
           </div>
