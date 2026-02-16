@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, useRef } from "react"
 import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react"
@@ -75,8 +75,8 @@ const testimonials = [
 
 export function TestimonialsSection() {
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true)
   const [itemsPerView, setItemsPerView] = useState(3)
+  const sliderRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const handleResize = () => {
@@ -103,11 +103,36 @@ export function TestimonialsSection() {
     setCurrentIndex((prev) => (prev <= 0 ? maxIndex : prev - 1))
   }
 
+  // Continuous right to left animation (never stops)
   useEffect(() => {
-    if (!isAutoPlaying) return
-    const interval = setInterval(nextSlide, 5000)
-    return () => clearInterval(interval)
-  }, [isAutoPlaying, nextSlide])
+    let animationFrame: number
+    let startTime: number
+    const slideWidth = sliderRef.current ? sliderRef.current.children[0]?.clientWidth + 24 : 0 // 24px gap
+    
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp
+      
+      const elapsed = timestamp - startTime
+      // Speed: 0.05px per ms (50px per second) - adjust this value to change speed
+      const moveDistance = elapsed * 0.05
+      
+      if (sliderRef.current && slideWidth > 0) {
+        const totalWidth = slideWidth * testimonials.length
+        const offset = moveDistance % totalWidth
+        sliderRef.current.style.transform = `translateX(-${offset}px)`
+      }
+      
+      animationFrame = requestAnimationFrame(animate)
+    }
+    
+    animationFrame = requestAnimationFrame(animate)
+    
+    return () => {
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame)
+      }
+    }
+  }, []) // Empty dependency array - animation never stops
 
   return (
     <section id="testimonials" className="py-24 bg-secondary">
@@ -122,11 +147,7 @@ export function TestimonialsSection() {
           </p>
         </div>
 
-        <div 
-          className="relative"
-          onMouseEnter={() => setIsAutoPlaying(false)}
-          onMouseLeave={() => setIsAutoPlaying(true)}
-        >
+        <div className="relative">
           {/* Navigation Buttons */}
           <Button
             variant="outline"
@@ -148,15 +169,17 @@ export function TestimonialsSection() {
             <ChevronRight className="h-5 w-5" />
           </Button>
 
-          {/* Testimonials Slider */}
+          {/* Testimonials Slider - Continuous Animation */}
           <div className="overflow-hidden mx-4 md:mx-8">
             <div 
-              className="flex transition-transform duration-500 ease-out gap-6"
-              style={{ transform: `translateX(calc(-${currentIndex * (100 / itemsPerView)}% - ${currentIndex * 24 / itemsPerView}px))` }}
+              ref={sliderRef}
+              className="flex gap-6 will-change-transform"
+              style={{ transform: 'translateX(0px)' }}
             >
-              {testimonials.map((testimonial) => (
+              {/* Double the testimonials for seamless loop */}
+              {[...testimonials, ...testimonials].map((testimonial, index) => (
                 <Card 
-                  key={testimonial.id} 
+                  key={`${testimonial.id}-${index}`} 
                   className="relative bg-card border-border hover:border-accent/30 hover:shadow-xl hover:-translate-y-2 transition-all duration-500 flex-shrink-0"
                   style={{ width: `calc(${100 / itemsPerView}% - ${(itemsPerView - 1) * 24 / itemsPerView}px)` }}
                 >

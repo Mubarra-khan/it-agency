@@ -70,7 +70,7 @@ export function ContactSection() {
               </a>
 
               <a 
-                href="https://wa.me/15551234567"
+                href="https://wa.me/923481388124"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-start gap-4 group"
@@ -80,7 +80,7 @@ export function ContactSection() {
                 </div>
                 <div>
                   <h4 className="font-medium text-primary-foreground group-hover:text-accent transition-colors">WhatsApp</h4>
-                  <p className="text-primary-foreground/70">+1 (555) 123-4567</p>
+                  <p className="text-primary-foreground/70">+9203481388124</p>
                 </div>
               </a>
 

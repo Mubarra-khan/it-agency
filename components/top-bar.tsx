@@ -15,18 +15,21 @@ export function TopBar() {
               <span className="xs:hidden">Email Us</span>
             </a>
             <a 
-              href="https://wa.me/15551234567" 
+              href="https://wa.me/923481388124" 
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 hover:text-accent transition-colors duration-300"
             >
               <Phone className="h-4 w-4" />
-              <span>+1 (555) 123-4567</span>
+              <span>+923481388124</span>
             </a>
           </div>
-          <div className="hidden sm:flex items-center gap-4 text-primary-foreground/70">
-            <span>Mon - Fri: 9:00 AM - 6:00 PM</span>
-          </div>
+        <div className="hidden sm:flex items-center gap-4 text-primary-foreground/70">
+  <span className="space-x-6">
+    <span>24/7</span>
+    <span>Available</span>
+  </span>
+</div>
         </div>
       </div>
     </div>
