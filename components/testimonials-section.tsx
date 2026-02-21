@@ -5,6 +5,7 @@ import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { motion, AnimatePresence } from "framer-motion"
 
 const testimonials = [
   {
@@ -76,7 +77,9 @@ const testimonials = [
 export function TestimonialsSection() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [itemsPerView, setItemsPerView] = useState(3)
+  const [isPaused, setIsPaused] = useState(false)
   const sliderRef = useRef<HTMLDivElement>(null)
+  const [slideWidth, setSlideWidth] = useState(0)
 
   useEffect(() => {
     const handleResize = () => {
@@ -87,7 +90,13 @@ export function TestimonialsSection() {
       } else {
         setItemsPerView(3)
       }
+
+      if (sliderRef.current && sliderRef.current.children[0]) {
+        const width = sliderRef.current.children[0].clientWidth + 24
+        setSlideWidth(width)
+      }
     }
+    
     handleResize()
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
@@ -103,23 +112,21 @@ export function TestimonialsSection() {
     setCurrentIndex((prev) => (prev <= 0 ? maxIndex : prev - 1))
   }
 
-  // Continuous right to left animation (never stops)
   useEffect(() => {
+    if (isPaused || slideWidth === 0) return
+
     let animationFrame: number
     let startTime: number
-    const slideWidth = sliderRef.current ? sliderRef.current.children[0]?.clientWidth + 24 : 0 // 24px gap
+    const totalWidth = slideWidth * testimonials.length
     
     const animate = (timestamp: number) => {
       if (!startTime) startTime = timestamp
       
       const elapsed = timestamp - startTime
-      // Speed: 0.05px per ms (50px per second) - adjust this value to change speed
-      const moveDistance = elapsed * 0.05
+      const moveDistance = (elapsed * 0.025) % totalWidth
       
-      if (sliderRef.current && slideWidth > 0) {
-        const totalWidth = slideWidth * testimonials.length
-        const offset = moveDistance % totalWidth
-        sliderRef.current.style.transform = `translateX(-${offset}px)`
+      if (sliderRef.current) {
+        sliderRef.current.style.transform = `translateX(-${moveDistance}px)`
       }
       
       animationFrame = requestAnimationFrame(animate)
@@ -132,104 +139,238 @@ export function TestimonialsSection() {
         cancelAnimationFrame(animationFrame)
       }
     }
-  }, []) // Empty dependency array - animation never stops
+  }, [slideWidth, isPaused])
+
+  const fadeInUp = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.5, ease: "easeOut" }
+  }
+
+  const staggerContainer = {
+    initial: { opacity: 0 },
+    animate: { 
+      opacity: 1,
+      transition: { 
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  }
 
   return (
-    <section id="testimonials" className="py-24 bg-secondary">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <p className="text-sm font-semibold uppercase tracking-wider text-accent">Testimonials</p>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+    <section id="testimonials" className="py-24 bg-secondary relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-transparent" />
+
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
+        <motion.div 
+          className="text-center mb-16"
+          initial="initial"
+          whileInView="animate"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={staggerContainer}
+        >
+          <motion.p 
+            variants={fadeInUp}
+            className="text-sm font-semibold uppercase tracking-wider text-accent"
+          >
+            Testimonials
+          </motion.p>
+          
+          <motion.h2 
+            variants={fadeInUp}
+            className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl"
+          >
             What Our Clients Say
-          </h2>
-          <p className="mt-4 max-w-2xl mx-auto text-muted-foreground">
-            {"Don't just take our word for it. Here's what our clients have to say about working with us."}
-          </p>
-        </div>
+          </motion.h2>
+          
+          <motion.p 
+            variants={fadeInUp}
+            className="mt-4 max-w-2xl mx-auto text-muted-foreground"
+          >
+            Don't just take our word for it. Here's what our clients have to say about working with us.
+          </motion.p>
+        </motion.div>
 
         <div className="relative">
-          {/* Navigation Buttons */}
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={prevSlide}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 bg-card/90 border-border hover:bg-accent hover:text-accent-foreground hover:scale-110 transition-all duration-300 hidden md:flex"
-            aria-label="Previous testimonial"
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.5 }}
           >
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={prevSlide}
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={() => setIsPaused(false)}
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-20 bg-white/80 dark:bg-gray-800/80 border-gray-200 dark:border-gray-700 hover:bg-accent hover:text-white hover:border-accent transition-all duration-300 hidden md:flex"
+              aria-label="Previous testimonial"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+          </motion.div>
           
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={nextSlide}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 bg-card/90 border-border hover:bg-accent hover:text-accent-foreground hover:scale-110 transition-all duration-300 hidden md:flex"
-            aria-label="Next testimonial"
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.5 }}
           >
-            <ChevronRight className="h-5 w-5" />
-          </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={nextSlide}
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={() => setIsPaused(false)}
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-20 bg-white/80 dark:bg-gray-800/80 border-gray-200 dark:border-gray-700 hover:bg-accent hover:text-white hover:border-accent transition-all duration-300 hidden md:flex"
+              aria-label="Next testimonial"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+          </motion.div>
 
-          {/* Testimonials Slider - Continuous Animation */}
-          <div className="overflow-hidden mx-4 md:mx-8">
-            <div 
+          <div 
+            className="overflow-hidden mx-4 md:mx-8"
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+          >
+            <motion.div 
               ref={sliderRef}
               className="flex gap-6 will-change-transform"
               style={{ transform: 'translateX(0px)' }}
             >
-              {/* Double the testimonials for seamless loop */}
               {[...testimonials, ...testimonials].map((testimonial, index) => (
-                <Card 
-                  key={`${testimonial.id}-${index}`} 
-                  className="relative bg-card border-border hover:border-accent/30 hover:shadow-xl hover:-translate-y-2 transition-all duration-500 flex-shrink-0"
+                <motion.div
+                  key={`${testimonial.id}-${index}`}
+                  className="flex-shrink-0 group"
                   style={{ width: `calc(${100 / itemsPerView}% - ${(itemsPerView - 1) * 24 / itemsPerView}px)` }}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.02, duration: 0.4 }}
+                  whileHover={{ 
+                    y: -8,
+                    scale: 1.02,
+                    transition: { type: "spring", stiffness: 400, damping: 17 }
+                  }}
                 >
-                  <CardContent className="p-8">
-                    <Quote className="h-10 w-10 text-accent/20 mb-4" />
+                  <Card className="relative bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 transition-all duration-300 h-full overflow-hidden">
+                    <motion.div 
+                      className="absolute top-0 left-0 right-0 h-1 bg-accent"
+                      initial={{ scaleX: 0 }}
+                      whileHover={{ scaleX: 1 }}
+                      transition={{ duration: 0.3 }}
+                    />
                     
-                    <div className="flex gap-1 mb-4">
-                      {Array.from({ length: testimonial.rating }).map((_, i) => (
-                        <Star key={i} className="h-5 w-5 fill-accent text-accent" />
-                      ))}
-                    </div>
+                    <motion.div 
+                      className="absolute inset-0 bg-accent/5"
+                      initial={{ opacity: 0 }}
+                      whileHover={{ opacity: 1 }}
+                      transition={{ duration: 0.3 }}
+                    />
                     
-                    <p className="text-muted-foreground mb-6 leading-relaxed line-clamp-4">
-                      "{testimonial.content}"
-                    </p>
-                    
-                    <div className="flex items-center gap-4">
-                      <div className="relative h-12 w-12 rounded-full bg-muted overflow-hidden ring-2 ring-accent/20">
-                        <Image
-                          src={testimonial.avatar || "/placeholder.svg"}
-                          alt={testimonial.name}
-                          fill
-                          className="object-cover"
-                        />
+                    <CardContent className="p-8 relative z-10">
+                      <motion.div
+                        whileHover={{ rotate: 5, scale: 1.1 }}
+                        transition={{ type: "spring", stiffness: 400 }}
+                      >
+                        <Quote className="h-8 w-8 text-accent/20 mb-4" />
+                      </motion.div>
+                      
+                      <div className="flex gap-1 mb-4">
+                        {Array.from({ length: testimonial.rating }).map((_, i) => (
+                          <motion.div
+                            key={i}
+                            whileHover={{ scale: 1.2, rotate: 5 }}
+                            transition={{ type: "spring", stiffness: 400 }}
+                          >
+                            <Star className="h-4 w-4 fill-accent text-accent" />
+                          </motion.div>
+                        ))}
                       </div>
-                      <div>
-                        <h4 className="font-semibold text-card-foreground">{testimonial.name}</h4>
-                        <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                      
+                      <motion.p 
+                        className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed line-clamp-4 text-sm"
+                        whileHover={{ color: "#111827" }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        "{testimonial.content}"
+                      </motion.p>
+                      
+                      <div className="flex items-center gap-4">
+                        <motion.div 
+                          className="relative h-10 w-10 rounded-full overflow-hidden ring-2 ring-accent/10"
+                          whileHover={{ 
+                            scale: 1.15,
+                            ringColor: "#6c5ce7",
+                            ringWidth: "3px",
+                            transition: { type: "spring", stiffness: 400 }
+                          }}
+                        >
+                          <Image
+                            src={testimonial.avatar || "/placeholder.svg"}
+                            alt={testimonial.name}
+                            fill
+                            className="object-cover"
+                          />
+                        </motion.div>
+                        <div>
+                          <motion.h4 
+                            className="font-semibold text-gray-900 dark:text-gray-100 text-sm"
+                            whileHover={{ x: 3, color: "#6c5ce7" }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            {testimonial.name}
+                          </motion.h4>
+                          <motion.p 
+                            className="text-xs text-gray-500 dark:text-gray-400"
+                            whileHover={{ x: 3 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            {testimonial.role}
+                          </motion.p>
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
+
+                      <motion.div 
+                        className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-accent/10 to-transparent"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileHover={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                      />
+                    </CardContent>
+                  </Card>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           </div>
 
-          {/* Dots indicator */}
-          <div className="flex justify-center gap-2 mt-8">
+          <motion.div 
+            className="flex justify-center gap-2 mt-8"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.6 }}
+          >
             {Array.from({ length: maxIndex + 1 }).map((_, i) => (
-              <button
+              <motion.button
                 key={i}
                 type="button"
-                onClick={() => setCurrentIndex(i)}
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  i === currentIndex ? "w-8 bg-accent" : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                onClick={() => {
+                  setCurrentIndex(i)
+                  setIsPaused(true)
+                  setTimeout(() => setIsPaused(false), 2000)
+                }}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  i === currentIndex ? "w-6 bg-accent" : "w-1.5 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500"
                 }`}
                 aria-label={`Go to testimonial ${i + 1}`}
+                whileHover={{ scale: 1.5 }}
+                whileTap={{ scale: 0.8 }}
               />
             ))}
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

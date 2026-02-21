@@ -57,7 +57,7 @@ export function ContactSection() {
 
             <div className="space-y-6">
               <a 
-                href="mailto:contact@digitalpro.agency"
+                href="mailto:devasad24@gmail.com"
                 className="flex items-start gap-4 group"
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-accent/20 text-accent group-hover:bg-accent group-hover:text-accent-foreground transition-all duration-300 group-hover:scale-110">
@@ -65,7 +65,7 @@ export function ContactSection() {
                 </div>
                 <div>
                   <h4 className="font-medium text-primary-foreground group-hover:text-accent transition-colors">Email</h4>
-                  <p className="text-primary-foreground/70">contact@digitalpro.agency</p>
+                  <p className="text-primary-foreground/70">devasad24@gmail.com</p>
                 </div>
               </a>
 

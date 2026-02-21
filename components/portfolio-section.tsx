@@ -4,7 +4,6 @@ import { useState } from "react"
 import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ExternalLink } from "lucide-react"
 
 // Portfolio items using only existing images
 const portfolioData: Record<string, Array<{ id: number; title: string; description: string; image: string }>> = {
@@ -91,7 +90,7 @@ export function PortfolioSection() {
           {displayedProjects.map((project, index) => (
             <Card 
               key={project.id} 
-              className="group overflow-hidden bg-card/10 border-primary-foreground/10 hover:border-accent/50 transition-all duration-500 hover:shadow-2xl hover:shadow-accent/20 hover:-translate-y-2"
+              className="group overflow-hidden bg-card/10 border-primary-foreground/10 hover:border-accent/50 transition-all duration-500 hover:shadow-2xl hover:shadow-accent/20 hover:-translate-y-2 cursor-default"
               style={{ animationDelay: `${(index % 8) * 50}ms` }}
             >
               <div className="relative aspect-[4/3] overflow-hidden bg-primary-foreground/5">
@@ -101,16 +100,8 @@ export function PortfolioSection() {
                   fill
                   className="object-cover transition-transform duration-700 group-hover:scale-125"
                 />
-                <div className="absolute inset-0 bg-primary/80 opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center">
-                  <Button 
-                    variant="secondary" 
-                    size="sm"
-                    className="transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 hover:scale-110"
-                  >
-                    <ExternalLink className="mr-2 h-4 w-4" />
-                    View Project
-                  </Button>
-                </div>
+                {/* Simple overlay effect without button */}
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               </div>
               <CardContent className="p-5 bg-card/5">
                 <span className="text-xs font-medium text-accent uppercase tracking-wider">

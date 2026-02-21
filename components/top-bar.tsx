@@ -7,11 +7,11 @@ export function TopBar() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
           <div className="flex items-center gap-6">
             <a 
-              href="mailto:contact@digitalpro.agency" 
+              href="mailto:devasad24@gmail.com"
               className="flex items-center gap-2 hover:text-accent transition-colors duration-300"
             >
               <Mail className="h-4 w-4" />
-              <span className="hidden xs:inline">contact@digitalpro.agency</span>
+              <span className="hidden xs:inline">devasad24@gmail.com</span>
               <span className="xs:hidden">Email Us</span>
             </a>
             <a 
@@ -24,12 +24,12 @@ export function TopBar() {
               <span>+923481388124</span>
             </a>
           </div>
-        <div className="hidden sm:flex items-center gap-4 text-primary-foreground/70">
-  <span className="space-x-6">
-    <span>24/7</span>
-    <span>Available</span>
-  </span>
-</div>
+          <div className="hidden sm:flex items-center gap-4 text-primary-foreground/70">
+            <span className="space-x-6">
+              <span>24/7</span>
+              <span>Available</span>
+            </span>
+          </div>
         </div>
       </div>
     </div>
